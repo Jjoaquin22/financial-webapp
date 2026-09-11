@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ReCaptcha from 'react-google-recaptcha';
 import { supabase } from '../supabaseClient';
 import './Auth.css';
@@ -14,13 +14,14 @@ interface LoginErrors {
 const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 function Login() {
+    const navigate = useNavigate();
     const captchaRef = useRef<ReCaptcha>(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [errors, setErrors] = useState<LoginErrors>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -36,7 +37,6 @@ function Login() {
         }
 
         setErrors({});
-        setSuccessMessage('');
         setIsLoading(true);
         const { error } = await supabase.auth.signInWithPassword({
             email: email.trim(),
@@ -48,18 +48,28 @@ function Login() {
             setErrors({ general: error.message });
             setCaptchaToken(null);
             captchaRef.current?.reset();
+            setIsLoading(false);
         } else {
-            setSuccessMessage('You are now signed in.');
+            setIsRedirecting(true);
+            await new Promise((resolve) => window.setTimeout(resolve, 750));
+            navigate('/Transaction', { replace: true });
         }
-        setIsLoading(false);
     };
+
+    if (isRedirecting) {
+        return (
+            <main className="auth-loading" role="status" aria-live="polite">
+                <div className="auth-spinner" aria-hidden="true" />
+                <p>Loading...</p>
+            </main>
+        );
+    }
 
     return (
         <main className="auth-page">
             <section className="auth-card" aria-labelledby="login-title">
                 <h1 id="login-title">Login</h1>
                 {errors.general && <div className="auth-alert auth-alert--error" role="alert">{errors.general}</div>}
-                {successMessage && <div className="auth-alert auth-alert--success" role="status">{successMessage}</div>}
                 <form onSubmit={handleLogin} noValidate>
                     <label className="auth-field">
                         <span>Email</span>

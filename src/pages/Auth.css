@@ -12,6 +12,11 @@
 .auth-alert { margin-bottom: 18px; padding: 10px 12px; border-radius: 6px; }
 .auth-alert--error { color: #991b1b; background: #fee2e2; }
 .auth-alert--success { color: #166534; background: #dcfce7; }
+.auth-loading { display: grid; min-height: 100vh; place-content: center; justify-items: center; gap: 16px; color: #334155; background: #f5f7fb; font-weight: 600; }
+.auth-loading p { margin: 0; }
+.auth-spinner { width: 46px; height: 46px; border: 5px solid #dbeafe; border-top-color: #2563eb; border-radius: 50%; animation: auth-spin .7s linear infinite; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .auth-spinner { animation-duration: 1.5s; } }
 .auth-submit { width: 100%; padding: 11px; border: 0; border-radius: 6px; color: #fff; background: #2563eb; cursor: pointer; font: inherit; font-weight: 700; }
 .auth-submit:hover:not(:disabled) { background: #1d4ed8; }
 .auth-submit:disabled { background: #94a3b8; cursor: not-allowed; }
