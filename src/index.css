@@ -1,0 +1,8 @@
+.auth-loading {
+  display: grid;
+  min-height: 100vh;
+  color: #526159;
+  background: #f4f7f5;
+  font: 600 .95rem Inter, ui-sans-serif, system-ui, sans-serif;
+  place-items: center;
+}

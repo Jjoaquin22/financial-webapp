@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
 import { supabase } from "../supabaseClient"
+import TransactionCards from "../components/TransactionCards"
 import "./Transaction.css"
 
 const TRANSACTIONS_TABLE = "transactions"
@@ -40,10 +40,6 @@ const pesoFormatter = new Intl.NumberFormat("en-PH", {
     style: "currency",
     currency: "PHP",
 })
-const dateFormatter = new Intl.DateTimeFormat("en-PH", {
-    dateStyle: "medium",
-    timeStyle: "short",
-})
 
 function toLocalInputDate(value = new Date().toISOString()) {
     const date = new Date(value)
@@ -62,11 +58,6 @@ function createEmptyForm(): FormState {
     }
 }
 
-function formatDate(value: string) {
-    const date = new Date(value)
-    return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date)
-}
-
 async function getAuthenticatedUserId() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) throw error
@@ -75,7 +66,6 @@ async function getAuthenticatedUserId() {
 }
 
 function Transaction() {
-    const navigate = useNavigate()
     const [transactions, setTransactions] = useState<TransactionRecord[]>([])
     const [form, setForm] = useState<FormState>(createEmptyForm)
     const [editingId, setEditingId] = useState<string | null>(null)
@@ -83,7 +73,6 @@ function Transaction() {
     const [isLoading, setIsLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [deletingId, setDeletingId] = useState<string | null>(null)
-    const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [message, setMessage] = useState<StatusMessage | null>(null)
     const [search, setSearch] = useState("")
     const [typeFilter, setTypeFilter] = useState<"all" | TransactionType>("all")
@@ -236,31 +225,9 @@ function Transaction() {
         }
     }
 
-    const handleLogout = async () => {
-        setIsLoggingOut(true)
-        const { error } = await supabase.auth.signOut()
-        if (error) {
-            setMessage({ kind: "error", text: `Unable to log out: ${error.message}` })
-            setIsLoggingOut(false)
-            return
-        }
-        navigate("/Login", { replace: true })
-    }
-
+   
     return (
         <div className="transactions-page">
-            <header className="transactions-header">
-                <Link className="brand" to="/Transaction" aria-label="Finaura transactions">
-                    <span className="brand-mark">F</span><span>Finaura</span>
-                </Link>
-                <nav aria-label="Primary navigation">
-                    <Link className="nav-link active" to="/Transaction">Transactions</Link>
-                </nav>
-                <button className="button button-ghost" type="button" disabled={isLoggingOut} onClick={() => void handleLogout()}>
-                    {isLoggingOut ? "Logging out…" : "Log out"}
-                </button>
-            </header>
-
             <main className="transactions-main">
                 <section className="page-heading">
                     <div><p className="eyebrow">Overview</p><h1>Transactions</h1><p>Track every peso across your accounts.</p></div>
@@ -275,30 +242,18 @@ function Transaction() {
                     <article className="summary-card"><span>Net balance</span><strong>{pesoFormatter.format(totals.income - totals.expense)}</strong></article>
                 </section>
 
-                <section className="transactions-card">
-                    <div className="toolbar">
-                        <div className="search-field"><span aria-hidden="true">⌕</span><input aria-label="Search transactions" type="search" placeholder="Search ID, category, wallet, or note" value={search} onChange={(event) => setSearch(event.target.value)} /></div>
-                        <label className="filter-field"><span>Type</span><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as "all" | TransactionType)}>
-                            <option value="all">All transactions</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Transfer</option>
-                        </select></label>
-                    </div>
-                    <div className="table-wrap">
-                        <table>
-                            <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Account</th><th>Note</th><th className="amount-cell">Amount</th><th><span className="sr-only">Actions</span></th></tr></thead>
-                            <tbody>
-                                {isLoading ? <tr><td className="empty-state" colSpan={7}>Loading transactions…</td></tr>
-                                    : visibleTransactions.length === 0 ? <tr><td className="empty-state" colSpan={7}>{transactions.length ? "No transactions match your search." : "No transactions yet. Add your first one to get started."}</td></tr>
-                                    : visibleTransactions.map((transaction) => <tr key={transaction.id}>
-                                        <td><span className="date-primary">{formatDate(transaction.transaction_date)}</span><small>{transaction.transaction_id}</small></td>
-                                        <td><span className={`type-badge type-${transaction.type}`}>{transaction.type}</span></td>
-                                        <td>{transaction.category}</td><td>{transaction.account_wallet}</td><td className="note-cell">{transaction.note || "—"}</td>
-                                        <td className={`amount-cell ${transaction.type === "income" ? "income-text" : transaction.type === "expense" ? "expense-text" : ""}`}>{transaction.type === "income" ? "+" : transaction.type === "expense" ? "−" : ""}{pesoFormatter.format(Number(transaction.amount))}</td>
-                                        <td><div className="row-actions"><button type="button" onClick={() => openEditForm(transaction)}>Edit</button><button className="delete-action" type="button" disabled={deletingId !== null} onClick={() => void handleDelete(transaction)}>{deletingId === transaction.id ? "Deleting…" : "Delete"}</button></div></td>
-                                    </tr>)}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                <TransactionCards
+                    transactions={visibleTransactions}
+                    totalTransactionCount={transactions.length}
+                    isLoading={isLoading}
+                    deletingId={deletingId}
+                    search={search}
+                    typeFilter={typeFilter}
+                    onSearchChange={setSearch}
+                    onTypeFilterChange={setTypeFilter}
+                    onEdit={openEditForm}
+                    onDelete={handleDelete}
+                />
             </main>
 
             {isFormVisible && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSubmitting) closeForm() }}>
