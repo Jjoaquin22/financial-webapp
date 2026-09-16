@@ -3,9 +3,11 @@ export type TransactionType = "income" | "expense" | "transfer"
 export interface TransactionTableItem {
     id: string
     transaction_id: string
-    type: TransactionType
-    category: string
-    account_wallet: string
+    type: string
+    category: { name: string } | null
+    account: { account_name: string } | null
+    from_account: { account_name: string } | null
+    to_account: { account_name: string } | null
     amount: number
     note: string | null
     transaction_date: string
@@ -28,6 +30,15 @@ function formatDate(value: string) {
     return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date)
 }
 
+function getAccountLabel(transaction: TransactionTableItem) {
+    if (transaction.type === "transfer") {
+        const from = transaction.from_account?.account_name ?? "No source"
+        const to = transaction.to_account?.account_name ?? "No destination"
+        return `${from} → ${to}`
+    }
+    return transaction.account?.account_name ?? "No account"
+}
+
 function TransactionTable<T extends TransactionTableItem>({
     transactions,
     totalTransactionCount,
@@ -46,7 +57,7 @@ function TransactionTable<T extends TransactionTableItem>({
                         : transactions.map((transaction) => <tr key={transaction.id}>
                             <td><span className="date-primary">{formatDate(transaction.transaction_date)}</span><small>{transaction.transaction_id}</small></td>
                             <td><span className={`type-badge type-${transaction.type}`}>{transaction.type}</span></td>
-                            <td>{transaction.category}</td><td>{transaction.account_wallet}</td><td className="note-cell">{transaction.note || "—"}</td>
+                            <td>{transaction.category?.name ?? "Uncategorized"}</td><td>{getAccountLabel(transaction)}</td><td className="note-cell">{transaction.note || "—"}</td>
                             <td className={`amount-cell ${transaction.type === "income" ? "income-text" : transaction.type === "expense" ? "expense-text" : ""}`}>{transaction.type === "income" ? "+" : transaction.type === "expense" ? "−" : ""}{pesoFormatter.format(Number(transaction.amount))}</td>
                             <td><div className="row-actions"><button type="button" onClick={() => onEdit(transaction)}>Edit</button><button className="delete-action" type="button" disabled={deletingId !== null} onClick={() => void onDelete(transaction)}>{deletingId === transaction.id ? "Deleting…" : "Delete"}</button></div></td>
                         </tr>)}

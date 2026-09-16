@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard"
 import BudgetManagement from "./pages/BudgetManagement"
 import SavingGoals from "./pages/SavingGoals"
 import Calendar from "./pages/Calendar"
+import Profile from "./pages/Profile"
 import NavBar from "./components/NavBar"
 import { supabase } from "./supabaseClient"
 
@@ -67,6 +68,7 @@ function App() {
           <Route path="/BudgetManagement" element={<BudgetManagement />} />
           <Route path="/SavingGoals" element={<SavingGoals />} />
           <Route path="/Calendar" element={<Calendar />} />
+          <Route path="/Profile" element={<Profile />} />
         </Route>
       </Route>
     </Routes>

@@ -9,6 +9,7 @@ const navigationItems = [
     { label: "Budget management", path: "/BudgetManagement", icon: "₱" },
     { label: "Saving goals", path: "/SavingGoals", icon: "◎" },
     { label: "Calendar", path: "/Calendar", icon: "□" },
+    { label: "Profile", path: "/Profile", icon: "●" },
 ]
 
 function NavBar() {
