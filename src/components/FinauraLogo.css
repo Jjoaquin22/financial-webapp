@@ -1,0 +1,8 @@
+.finaura-logo { display:inline-flex; gap:11px; align-items:center; color:var(--ink-strong, #173e2b); }
+.finaura-logo-symbol { display:block; width:44px; height:44px; flex:0 0 auto; filter:drop-shadow(0 7px 10px rgb(13 82 52 / 18%)); }
+.finaura-logo-copy { display:grid; gap:1px; line-height:1; }
+.finaura-logo-copy strong { font-size:1.18rem; font-weight:850; letter-spacing:-.035em; }
+.finaura-logo-copy small { color:var(--ink-muted, #758279); font-size:.59rem; font-weight:700; letter-spacing:.055em; text-transform:uppercase; }
+.finaura-logo-inverse { color:#fff; }
+.finaura-logo-inverse .finaura-logo-copy small { color:rgb(255 255 255 / 68%); }
+.finaura-logo-inverse .finaura-logo-symbol { filter:drop-shadow(0 8px 12px rgb(4 42 25 / 28%)); }

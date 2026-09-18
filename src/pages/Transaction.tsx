@@ -9,6 +9,7 @@ type InstitutionType = "bank" | "e_wallet" | "cash"
 type Category = Pick<Tables<"categories">, "id" | "name" | "type">
 type Account = Pick<Tables<"accounts">, "id" | "account_name" | "account_type" | "financial_institution_id">
 type FinancialInstitution = Pick<Tables<"financial_institutions">, "id" | "name"> & { type: InstitutionType }
+type SavingGoalOption = Pick<Tables<"saving_goals">, "savings_id" | "goal_name" | "target_amount">
 type StatusMessage = { kind: "success" | "error"; text: string }
 type CategoryLoadState = "loading" | "ready" | "empty" | "error"
 type InstitutionLoadState = "loading" | "ready" | "empty" | "error"
@@ -24,6 +25,7 @@ type FormState = {
     accountId: string
     fromAccountId: string
     toAccountId: string
+    savingGoalId: string
     amount: string
     note: string
     transactionDate: string
@@ -62,7 +64,7 @@ function toLocalInputDate(value = new Date().toISOString()) {
 }
 
 function createEmptyForm(type: TransactionType = "income"): FormState {
-    return { type, categoryId: "", accountId: "", fromAccountId: "", toAccountId: "", amount: "", note: "", transactionDate: toLocalInputDate() }
+    return { type, categoryId: "", accountId: "", fromAccountId: "", toAccountId: "", savingGoalId: "", amount: "", note: "", transactionDate: toLocalInputDate() }
 }
 
 async function getAuthenticatedUserId() {
@@ -78,6 +80,7 @@ function Transaction() {
     const [categoryLoadState, setCategoryLoadState] = useState<CategoryLoadState>("loading")
     const [accounts, setAccounts] = useState<Account[]>([])
     const [institutions, setInstitutions] = useState<FinancialInstitution[]>([])
+    const [savingGoals, setSavingGoals] = useState<SavingGoalOption[]>([])
     const [institutionLoadState, setInstitutionLoadState] = useState<InstitutionLoadState>("loading")
     const [form, setForm] = useState<FormState>(createEmptyForm)
     const [editingId, setEditingId] = useState<string | null>(null)
@@ -95,11 +98,12 @@ function Transaction() {
         setInstitutionLoadState("loading")
         try {
             const userId = await getAuthenticatedUserId()
-            const [transactionResult, categoryResult, accountResult, institutionResult] = await Promise.all([
+            const [transactionResult, categoryResult, accountResult, institutionResult, savingGoalResult] = await Promise.all([
                 supabase.from("transactions").select(TRANSACTION_SELECT).eq("user_id", userId).order("transaction_date", { ascending: false }),
                 supabase.from("categories").select("id, name, type").order("name"),
                 supabase.from("accounts").select("id, account_name, account_type, financial_institution_id").eq("user_id", userId).eq("is_active", true).order("account_name"),
                 supabase.from("financial_institutions").select("id, name, type").eq("is_active", true).order("name"),
+                supabase.from("saving_goals").select("savings_id, goal_name, target_amount").eq("user_id", userId).order("created_at", { ascending: false }),
             ])
             if (transactionResult.error) throw transactionResult.error
             setTransactions((transactionResult.data ?? []) as TransactionRecord[])
@@ -121,6 +125,8 @@ function Transaction() {
                 setInstitutions(institutionRows)
                 setInstitutionLoadState(institutionRows.length > 0 ? "ready" : "empty")
             }
+            if (savingGoalResult.error) throw savingGoalResult.error
+            setSavingGoals(savingGoalResult.data ?? [])
         } catch (error) {
             setTransactions([])
             setInstitutionLoadState("error")
@@ -193,6 +199,7 @@ function Transaction() {
             accountId: findInstitutionId(transaction.account),
             fromAccountId: findInstitutionId(transaction.from_account),
             toAccountId: findInstitutionId(transaction.to_account),
+            savingGoalId: transaction.saving_goal_id === null ? "" : String(transaction.saving_goal_id),
             amount: String(transaction.amount),
             note: transaction.note ?? "",
             transactionDate: toLocalInputDate(transaction.transaction_date),
@@ -211,6 +218,7 @@ function Transaction() {
             accountId: nextType === "transfer" ? "" : current.accountId || institutions[0]?.id || "",
             fromAccountId: nextType === "transfer" ? current.fromAccountId || institutions[0]?.id || "" : "",
             toAccountId: nextType === "transfer" ? current.toAccountId : "",
+            savingGoalId: nextType === "transfer" ? current.savingGoalId : "",
         }))
     }
 
@@ -278,7 +286,7 @@ function Transaction() {
                 account_id: accountId,
                 from_account_id: fromAccountId,
                 to_account_id: toAccountId,
-                saving_goal_id: existing?.saving_goal_id ?? null,
+                saving_goal_id: form.type === "transfer" && form.savingGoalId ? Number(form.savingGoalId) : null,
             }
             const query = editingId
                 ? supabase.from("transactions").update(payload satisfies TablesUpdate<"transactions">).eq("id", editingId).eq("user_id", userId)
@@ -353,6 +361,10 @@ function Transaction() {
                                 {institutionLoadState === "empty" && <option value="">No accounts available</option>}
                                 {institutionLoadState === "ready" && <option value="">Select account</option>}
                                 {groupedInstitutions.map((group) => group.institutions.length > 0 && <optgroup key={group.type} label={group.label}>{group.institutions.map((institution) => <option key={institution.id} value={institution.id}>{institution.name}</option>)}</optgroup>)}
+                            </select></label>
+                            <label className="full-field"><span>Saving goal <small>(optional)</small></span><select value={form.savingGoalId} onChange={(event) => updateForm("savingGoalId", event.target.value)}>
+                                <option value="">Do not assign to a goal</option>
+                                {savingGoals.map((goal) => <option key={goal.savings_id} value={goal.savings_id}>{goal.goal_name ?? "Saving goal"} — {pesoFormatter.format(Number(goal.target_amount ?? 0))}</option>)}
                             </select></label>
                         </> : <label><span>Account <small>(optional)</small></span><select value={form.accountId} onChange={(event) => updateForm("accountId", event.target.value)} disabled={institutionLoadState !== "ready"}>
                             {institutionLoadState === "loading" && <option value="">Loading accounts…</option>}

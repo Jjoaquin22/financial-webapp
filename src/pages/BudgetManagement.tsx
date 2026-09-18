@@ -42,7 +42,7 @@ async function getAuthenticatedUserId() {
 }
 
 function getBudgetStatus(percentage: number) {
-    if (percentage > 100) return { className: "danger", label: "Budget exceeded" }
+    if (percentage >=  100) return { className: "danger", label: "Budget limit reached" }
     if (percentage >= 80) return { className: "warning", label: "Near budget limit" }
     return { className: "safe", label: "On track" }
 }

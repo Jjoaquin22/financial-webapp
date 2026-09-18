@@ -1,0 +1,12 @@
+.ai-card-note { display:flex; margin:13px 0 0; padding:10px 11px; gap:8px; align-items:flex-start; border:1px solid #d9ebe0; border-left:3px solid #35835d; border-radius:8px; background:#f2f9f5; color:#244c38; font-size:.76rem; font-weight:650; line-height:1.5; letter-spacing:.01em; box-shadow:0 1px 2px rgba(24,91,57,.06); }
+.ai-card-note>span:last-child { min-width:0; }
+.ai-note-mark { flex:0 0 auto; color:#23724c; font-size:.86rem; font-weight:800; line-height:1.25; }
+.ai-card-note-warning { border-color:#f0dfc6; border-left-color:#c47a1f; background:#fff8ed; color:#704915; }
+.ai-card-note-warning .ai-note-mark { color:#b66a11; }
+.ai-card-note-success { border-color:#cce9da; border-left-color:#168157; background:#effaf4; color:#17583d; }
+.ai-card-note-success .ai-note-mark { color:#168157; }
+.ai-note-spinner { display:inline-block; width:10px; height:10px; margin:2px 3px 0 0; border:1.5px solid #6b8b78; border-right-color:transparent; border-radius:50%; vertical-align:top; animation:ai-note-spin .8s linear infinite; }
+.average-report>.ai-card-note { grid-column:1/-1; margin:13px 0 0; padding:10px 11px; color:#137a4d; }
+.analytics-panel>.ai-card-note { margin-top:18px; }
+@keyframes ai-note-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .ai-note-spinner { animation-duration:1.6s; } }

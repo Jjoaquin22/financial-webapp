@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ReCaptcha from 'react-google-recaptcha';
+import { FinauraLogo } from '../components/FinauraLogo';
+import './Auth.css';
 
 interface SignupFormData {
     email: string;
@@ -191,233 +193,115 @@ function Signup() {
     };
 
     return (
-        <div
-            style={{
-                maxWidth: '400px',
-                margin: '50px auto',
-                padding: '20px',
-            }}
-        >
-            <h2>Sign Up</h2>
+        <main className="auth-page">
+            <section className="auth-shell" aria-label="Create your account">
+                <aside className="auth-visual">
+                    <FinauraLogo inverse showTagline />
+                    <h2>Build a clearer financial future.</h2>
+                    <p>Join your budget, savings goals, and spending habits in one calm place.</p>
+                    <ul className="auth-checklist">
+                        <li>Track every expense</li>
+                        <li>Plan smarter budgets</li>
+                        <li>Stay on top of goals</li>
+                    </ul>
+                </aside>
 
-           
-
-            {errors.general && (
-                <div
-                    style={{
-                        color: 'red',
-                        marginBottom: '15px',
-                        padding: '10px',
-                        backgroundColor: '#ffe0e0',
-                        borderRadius: '4px',
-                    }}
-                >
-                    {errors.general}
-                </div>
-            )}
-
-            {successMessage && (
-                <div
-                    style={{
-                        color: 'green',
-                        marginBottom: '15px',
-                        padding: '10px',
-                        backgroundColor: '#e0ffe0',
-                        borderRadius: '4px',
-                    }}
-                >
-                    {successMessage}
-                </div>
-            )}
-
-            <form onSubmit={handleSignup}>
-
-                {/* Email */}
-                <div style={{ marginBottom: '15px' }}>
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        disabled={isLoading}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            borderRadius: '4px',
-                            border: errors.email
-                                ? '2px solid red'
-                                : '1px solid #ccc',
-                            boxSizing: 'border-box',
-                        }}
-                    />
-
-                    {errors.email && (
-                        <p
-                            style={{
-                                color: 'red',
-                                fontSize: '12px',
-                                marginTop: '5px',
-                            }}
-                        >
-                            {errors.email}
-                        </p>
-                    )}
-                </div>
-
-                {/* Password */}
-                <div style={{ marginBottom: '15px' }}>
-                    <div style={{ display: 'flex' }}>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            placeholder="Password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            disabled={isLoading}
-                            style={{
-                                flex: 1,
-                                padding: '10px',
-                                borderRadius: '4px 0 0 4px',
-                                border: errors.password
-                                    ? '2px solid red'
-                                    : '1px solid #ccc',
-                                boxSizing: 'border-box',
-                            }}
-                        />
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setShowPassword(!showPassword)
-                            }
-                            style={{
-                                padding: '10px',
-                                border: '1px solid #ccc',
-                                backgroundColor: '#f5f5f5',
-                                cursor: 'pointer',
-                                borderRadius: '0 4px 4px 0',
-                            }}
-                        >
-                            {showPassword ? 'Hide' : 'Show'}
-                        </button>
+                <div className="auth-card" aria-labelledby="signup-title">
+                    <div className="auth-header">
+                        <span className="auth-badge">New account</span>
+                        <h1 id="signup-title">Sign up</h1>
                     </div>
 
-                    {errors.password && (
-                        <p
-                            style={{
-                                color: 'red',
-                                fontSize: '12px',
-                                marginTop: '5px',
-                            }}
-                        >
-                            {errors.password}
-                        </p>
-                    )}
-                </div>
+                    {errors.general && <div className="auth-alert" role="alert">{errors.general}</div>}
+                    {successMessage && <div className="auth-success" role="status">{successMessage}</div>}
 
-                {/* Confirm Password */}
-                <div style={{ marginBottom: '15px' }}>
-                    <div style={{ display: 'flex' }}>
-                        <input
-                            type={
-                                showConfirmPassword
-                                    ? 'text'
-                                    : 'password'
-                            }
-                            name="confirmPassword"
-                            placeholder="Confirm Password"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            disabled={isLoading}
-                            style={{
-                                flex: 1,
-                                padding: '10px',
-                                borderRadius: '4px 0 0 4px',
-                                border: errors.confirmPassword
-                                    ? '2px solid red'
-                                    : '1px solid #ccc',
-                                boxSizing: 'border-box',
-                            }}
-                        />
+                    <form className="auth-form" onSubmit={handleSignup} noValidate>
+                        <label className="auth-field">
+                            <span>Email</span>
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="you@example.com"
+                                value={formData.email}
+                                onChange={handleChange}
+                                disabled={isLoading}
+                                aria-invalid={Boolean(errors.email)}
+                                className={errors.email ? 'is-invalid' : ''}
+                            />
+                            {errors.email && <small className="auth-error">{errors.email}</small>}
+                        </label>
 
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setShowConfirmPassword(
-                                    !showConfirmPassword
-                                )
-                            }
-                            style={{
-                                padding: '10px',
-                                border: '1px solid #ccc',
-                                backgroundColor: '#f5f5f5',
-                                cursor: 'pointer',
-                                borderRadius: '0 4px 4px 0',
-                            }}
-                        >
-                            {showConfirmPassword ? 'Hide' : 'Show'}
+                        <label className="auth-field">
+                            <span>Password</span>
+                            <div className="auth-password-row">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    placeholder="Create a strong password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                    aria-invalid={Boolean(errors.password)}
+                                    className={errors.password ? 'is-invalid' : ''}
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-password-toggle"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? 'Hide' : 'Show'}
+                                </button>
+                            </div>
+                            {errors.password && <small className="auth-error">{errors.password}</small>}
+                        </label>
+
+                        <label className="auth-field">
+                            <span>Confirm password</span>
+                            <div className="auth-password-row">
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    name="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    disabled={isLoading}
+                                    aria-invalid={Boolean(errors.confirmPassword)}
+                                    className={errors.confirmPassword ? 'is-invalid' : ''}
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-password-toggle"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    {showConfirmPassword ? 'Hide' : 'Show'}
+                                </button>
+                            </div>
+                            {errors.confirmPassword && <small className="auth-error">{errors.confirmPassword}</small>}
+                        </label>
+
+                        <div className="auth-captcha">
+                            <ReCaptcha
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''}
+                                onChange={(token: string | null) => {
+                                    setCaptchaToken(token);
+                                    if (token) {
+                                        console.log('✓ reCAPTCHA verified');
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        <button className="auth-submit" type="submit" disabled={isLoading}>
+                            {isLoading ? 'Signing up...' : 'Create account'}
                         </button>
-                    </div>
+                    </form>
 
-                    {errors.confirmPassword && (
-                        <p
-                            style={{
-                                color: 'red',
-                                fontSize: '12px',
-                                marginTop: '5px',
-                            }}
-                        >
-                            {errors.confirmPassword}
-                        </p>
-                    )}
+                    <p className="auth-footer">
+                        Already have an account? <Link to="/Login">Login here</Link>
+                    </p>
                 </div>
-
-                {/* reCAPTCHA v2 Checkbox */}
-                <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'center' }}>
-                    <ReCaptcha
-                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''}
-                        onChange={(token: string | null) => {
-                            setCaptchaToken(token);
-                            if (token) {
-                                console.log('✓ reCAPTCHA verified');
-                            }
-                        }}
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    style={{
-                        width: '100%',
-                        padding: '10px',
-                        backgroundColor: isLoading
-                            ? '#ccc'
-                            : '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: isLoading
-                            ? 'not-allowed'
-                            : 'pointer',
-                        fontSize: '16px',
-                    }}
-                >
-                    {isLoading ? 'Signing up...' : 'Sign Up'}
-                </button>
-            </form>
-
-            <p
-                style={{
-                    textAlign: 'center',
-                    marginTop: '20px',
-                }}
-            >
-                Already have an account?{' '}
-                <Link to="/Login">Login here</Link>
-            </p>
-        </div>
+            </section>
+        </main>
     );
 }
 
