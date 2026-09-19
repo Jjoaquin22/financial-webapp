@@ -56,7 +56,7 @@ function TransactionTable<T extends TransactionTableItem>({
                         : transactions.length === 0 ? <tr><td className="empty-state" colSpan={7}>{totalTransactionCount ? "No transactions match your search." : "No transactions yet. Add your first one to get started."}</td></tr>
                         : transactions.map((transaction) => <tr key={transaction.id}>
                             <td><span className="date-primary">{formatDate(transaction.transaction_date)}</span><small>{transaction.transaction_id}</small></td>
-                            <td><span className={`type-badge type-${transaction.type}`}>{transaction.type}</span></td>
+                            <td><span className={`type-badge type-${transaction.type}`}>{transaction.type === "transfer" ? "Savings" : transaction.type}</span></td>
                             <td>{transaction.category?.name ?? "Uncategorized"}</td><td>{getAccountLabel(transaction)}</td><td className="note-cell">{transaction.note || "—"}</td>
                             <td className={`amount-cell ${transaction.type === "income" ? "income-text" : transaction.type === "expense" ? "expense-text" : ""}`}>{transaction.type === "income" ? "+" : transaction.type === "expense" ? "−" : ""}{pesoFormatter.format(Number(transaction.amount))}</td>
                             <td><div className="row-actions"><button type="button" onClick={() => onEdit(transaction)}>Edit</button><button className="delete-action" type="button" disabled={deletingId !== null} onClick={() => void onDelete(transaction)}>{deletingId === transaction.id ? "Deleting…" : "Delete"}</button></div></td>

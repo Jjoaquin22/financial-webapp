@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { supabase } from "../supabaseClient"
 import { FinauraLogo } from "./FinauraLogo"
+import { NotificationCenter } from "./NotificationCenter"
 import "./NavBar.css"
 
 type IconName = "dashboard" | "transactions" | "budget" | "goals" | "calendar" | "profile" | "logout" | "menu" | "close"
@@ -61,6 +62,8 @@ function NavBar() {
                 <NavLink className="sidebar-brand" to="/Dashboard" aria-label="Finaura dashboard" onClick={() => setIsOpen(false)}>
                     <FinauraLogo showTagline />
                 </NavLink>
+
+                <NotificationCenter />
 
                 <p className="sidebar-section-label">Workspace</p>
                 <nav className="sidebar-nav" aria-label="Main navigation">

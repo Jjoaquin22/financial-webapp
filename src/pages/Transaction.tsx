@@ -23,8 +23,6 @@ type FormState = {
     type: TransactionType
     categoryId: string
     accountId: string
-    fromAccountId: string
-    toAccountId: string
     savingGoalId: string
     amount: string
     note: string
@@ -64,7 +62,7 @@ function toLocalInputDate(value = new Date().toISOString()) {
 }
 
 function createEmptyForm(type: TransactionType = "income"): FormState {
-    return { type, categoryId: "", accountId: "", fromAccountId: "", toAccountId: "", savingGoalId: "", amount: "", note: "", transactionDate: toLocalInputDate() }
+    return { type, categoryId: "", accountId: "", savingGoalId: "", amount: "", note: "", transactionDate: toLocalInputDate() }
 }
 
 async function getAuthenticatedUserId() {
@@ -197,8 +195,6 @@ function Transaction() {
             type,
             categoryId: transaction.category_id ?? "",
             accountId: findInstitutionId(transaction.account),
-            fromAccountId: findInstitutionId(transaction.from_account),
-            toAccountId: findInstitutionId(transaction.to_account),
             savingGoalId: transaction.saving_goal_id === null ? "" : String(transaction.saving_goal_id),
             amount: String(transaction.amount),
             note: transaction.note ?? "",
@@ -216,8 +212,6 @@ function Transaction() {
             type: nextType,
             categoryId: categories.find((category) => category.type === nextType)?.id ?? "",
             accountId: nextType === "transfer" ? "" : current.accountId || institutions[0]?.id || "",
-            fromAccountId: nextType === "transfer" ? current.fromAccountId || institutions[0]?.id || "" : "",
-            toAccountId: nextType === "transfer" ? current.toAccountId : "",
             savingGoalId: nextType === "transfer" ? current.savingGoalId : "",
         }))
     }
@@ -262,8 +256,8 @@ function Transaction() {
             setMessage({ kind: "error", text: "Please enter a valid amount and date." })
             return
         }
-        if (form.type === "transfer" && (!form.fromAccountId || !form.toAccountId || form.fromAccountId === form.toAccountId)) {
-            setMessage({ kind: "error", text: "Choose two different accounts for a transfer." })
+        if (form.type === "transfer" && !form.savingGoalId) {
+            setMessage({ kind: "error", text: "Please select a saving goal." })
             return
         }
 
@@ -273,8 +267,6 @@ function Transaction() {
             const userId = await getAuthenticatedUserId()
             const existing = editingId ? transactions.find(({ id }) => id === editingId) : undefined
             const accountId = form.type === "transfer" ? null : await resolveAccountId(form.accountId, userId)
-            const fromAccountId = form.type === "transfer" ? await resolveAccountId(form.fromAccountId, userId) : null
-            const toAccountId = form.type === "transfer" ? await resolveAccountId(form.toAccountId, userId) : null
             const payload: TablesInsert<"transactions"> = {
                 user_id: userId,
                 transaction_id: existing?.transaction_id ?? `TXN-${crypto.randomUUID()}`,
@@ -282,10 +274,10 @@ function Transaction() {
                 amount,
                 note: form.note.trim() || null,
                 transaction_date: date.toISOString(),
-                category_id: form.categoryId || null,
+                category_id: form.type === "transfer" ? null : form.categoryId || null,
                 account_id: accountId,
-                from_account_id: fromAccountId,
-                to_account_id: toAccountId,
+                from_account_id: null,
+                to_account_id: null,
                 saving_goal_id: form.type === "transfer" && form.savingGoalId ? Number(form.savingGoalId) : null,
             }
             const query = editingId
@@ -338,32 +330,18 @@ function Transaction() {
             <section className="transaction-modal" role="dialog" aria-modal="true" aria-labelledby="transaction-form-title">
                 <div className="modal-heading"><div><p className="eyebrow">{editingId ? "Update record" : "New record"}</p><h2 id="transaction-form-title">{editingId ? "Edit transaction" : "Add transaction"}</h2></div><button className="close-button" type="button" aria-label="Close form" disabled={isSubmitting} onClick={closeForm}>×</button></div>
                 <form id="transaction-form" onSubmit={handleSubmit}>
-                    <div className="type-picker" role="group" aria-label="Transaction type">{(["income", "expense", "transfer"] as const).map((option) => <button key={option} className={form.type === option ? "selected" : ""} type="button" onClick={() => handleTypeChange(option)}>{option}</button>)}</div>
+                    <div className="type-picker" role="group" aria-label="Transaction type">{(["income", "expense", "transfer"] as const).map((option) => <button key={option} className={form.type === option ? "selected" : ""} type="button" onClick={() => handleTypeChange(option)}>{option === "transfer" ? "Savings" : option}</button>)}</div>
                     <div className="form-grid">
-                        <label><span>Category</span><select value={form.categoryId} onChange={(event) => updateForm("categoryId", event.target.value)} disabled={categoryLoadState !== "ready"} required={categoryLoadState === "ready"}>
+                        {form.type !== "transfer" && <label><span>Category</span><select value={form.categoryId} onChange={(event) => updateForm("categoryId", event.target.value)} disabled={categoryLoadState !== "ready"} required={categoryLoadState === "ready"}>
                             {categoryLoadState === "loading" && <option value="">Loading categories…</option>}
                             {categoryLoadState === "error" && <option value="">Unable to load categories</option>}
                             {categoryLoadState === "empty" && <option value="">No categories available</option>}
                             {categoryLoadState === "ready" && <option value="">Select category</option>}
                             {availableCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-                        </select></label>
+                        </select></label>}
                         {form.type === "transfer" ? <>
-                            <label><span>From account</span><select value={form.fromAccountId} onChange={(event) => updateForm("fromAccountId", event.target.value)} disabled={institutionLoadState !== "ready"} required>
-                                {institutionLoadState === "loading" && <option value="">Loading accounts…</option>}
-                                {institutionLoadState === "error" && <option value="">Unable to load accounts</option>}
-                                {institutionLoadState === "empty" && <option value="">No accounts available</option>}
-                                {institutionLoadState === "ready" && <option value="">Select account</option>}
-                                {groupedInstitutions.map((group) => group.institutions.length > 0 && <optgroup key={group.type} label={group.label}>{group.institutions.map((institution) => <option key={institution.id} value={institution.id}>{institution.name}</option>)}</optgroup>)}
-                            </select></label>
-                            <label><span>To account</span><select value={form.toAccountId} onChange={(event) => updateForm("toAccountId", event.target.value)} disabled={institutionLoadState !== "ready"} required>
-                                {institutionLoadState === "loading" && <option value="">Loading accounts…</option>}
-                                {institutionLoadState === "error" && <option value="">Unable to load accounts</option>}
-                                {institutionLoadState === "empty" && <option value="">No accounts available</option>}
-                                {institutionLoadState === "ready" && <option value="">Select account</option>}
-                                {groupedInstitutions.map((group) => group.institutions.length > 0 && <optgroup key={group.type} label={group.label}>{group.institutions.map((institution) => <option key={institution.id} value={institution.id}>{institution.name}</option>)}</optgroup>)}
-                            </select></label>
-                            <label className="full-field"><span>Saving goal <small>(optional)</small></span><select value={form.savingGoalId} onChange={(event) => updateForm("savingGoalId", event.target.value)}>
-                                <option value="">Do not assign to a goal</option>
+                            <label className="full-field"><span>Saving goal</span><select value={form.savingGoalId} onChange={(event) => updateForm("savingGoalId", event.target.value)} required>
+                                <option value="">{savingGoals.length ? "Select saving goal" : "No saving goals available"}</option>
                                 {savingGoals.map((goal) => <option key={goal.savings_id} value={goal.savings_id}>{goal.goal_name ?? "Saving goal"} — {pesoFormatter.format(Number(goal.target_amount ?? 0))}</option>)}
                             </select></label>
                         </> : <label><span>Account <small>(optional)</small></span><select value={form.accountId} onChange={(event) => updateForm("accountId", event.target.value)} disabled={institutionLoadState !== "ready"}>
@@ -377,8 +355,7 @@ function Transaction() {
                         <label><span>Date and time</span><input type="datetime-local" value={form.transactionDate} onChange={(event) => updateForm("transactionDate", event.target.value)} required /></label>
                         <label className="full-field"><span>Note <small>(optional)</small></span><textarea rows={3} placeholder="Add a short description" value={form.note} onChange={(event) => updateForm("note", event.target.value)} /></label>
                     </div>
-                    {form.type === "transfer" && institutionLoadState === "ready" && institutions.length < 2 && <p className="form-hint" role="status">At least two financial institutions are required for a transfer.</p>}
-                    <div className="form-actions"><button className="button button-ghost" type="button" disabled={isSubmitting} onClick={closeForm}>Cancel</button><button className="button button-primary" type="submit" disabled={isSubmitting || (form.type === "transfer" && (institutionLoadState !== "ready" || institutions.length < 2))}>{isSubmitting ? "Saving…" : editingId ? "Save changes" : "Add transaction"}</button></div>
+                    <div className="form-actions"><button className="button button-ghost" type="button" disabled={isSubmitting} onClick={closeForm}>Cancel</button><button className="button button-primary" type="submit" disabled={isSubmitting || (form.type === "transfer" && savingGoals.length === 0)}>{isSubmitting ? "Saving…" : editingId ? "Save changes" : "Add transaction"}</button></div>
                 </form>
             </section>
         </div>}

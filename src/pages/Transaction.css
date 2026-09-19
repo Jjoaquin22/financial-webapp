@@ -95,6 +95,8 @@ td small { display: block; max-width: 155px; margin-top: 4px; overflow: hidden; 
     .toolbar { flex-direction: column; }
     .filter-field { justify-content: space-between; }
     .filter-field select { flex: 1; }
+    .table-wrap { overscroll-behavior-inline:contain; -webkit-overflow-scrolling:touch; }
+    .table-wrap table { min-width:760px; }
     .form-grid { grid-template-columns: 1fr; }
     .full-field { grid-column: auto; }
 }
@@ -102,9 +104,11 @@ td small { display: block; max-width: 155px; margin-top: 4px; overflow: hidden; 
 @media (max-width: 480px) {
     .page-heading { display: grid; }
     .page-heading .button { width: 100%; }
-    .modal-backdrop { padding: 10px; align-items: end; }
-    .transaction-modal { border-radius: 18px 18px 8px 8px; }
+    .modal-backdrop { padding:10px max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); align-items:end; }
+    .transaction-modal { max-height:calc(100dvh - 20px); overflow-y:auto; border-radius:18px 18px 8px 8px; overscroll-behavior:contain; }
     .modal-heading, .transaction-modal form { padding-right: 18px; padding-left: 18px; }
+    .form-actions { display:grid; grid-template-columns:1fr 1fr; }
+    .form-actions .button { width:100%; min-height:44px; }
 }
 
 @media (prefers-reduced-motion: reduce) { .button { transition: none; } }
