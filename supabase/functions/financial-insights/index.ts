@@ -38,7 +38,17 @@ interface SavingProgressRow {
     percentage_completed: number | string | null
 }
 
+interface RateLimitRow {
+    decision: "allowed" | "cache_hit" | "concurrent_request" | "rate_limited"
+    retry_after_seconds: number
+    request_token: string | null
+    cached_response: unknown | null
+}
+
 const placements: InsightPlacement[] = ["income", "expenses", "net", "saved", "average", "spending", "cashflow", "budget", "savings"]
+const GEMINI_TIMEOUT_MS = 25_000
+const GEMINI_MAX_RETRIES = 1
+const TEMPORARY_GEMINI_STATUSES = new Set([408, 429, 500, 502, 503, 504])
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -51,6 +61,45 @@ function jsonResponse(body: unknown, status = 200, extraHeaders: Record<string, 
 
 function publicError(message: string, status: number, extraHeaders: Record<string, string> = {}) {
     return jsonResponse({ error: message }, status, extraHeaders)
+}
+
+function clientIp(request: Request) {
+    const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    return (request.headers.get("cf-connecting-ip") ?? request.headers.get("x-real-ip") ?? forwardedFor ?? "unknown").slice(0, 128)
+}
+
+async function hashIp(ip: string, secret: string) {
+    const encoder = new TextEncoder()
+    const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+    const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(ip))
+    return [...new Uint8Array(signature)].map((byte) => byte.toString(16).padStart(2, "0")).join("")
+}
+
+async function fetchGeminiWithRetry(url: string, options: RequestInit) {
+    const deadline = Date.now() + GEMINI_TIMEOUT_MS
+    let lastError: unknown
+
+    for (let attempt = 0; attempt <= GEMINI_MAX_RETRIES; attempt += 1) {
+        const remainingTime = deadline - Date.now()
+        if (remainingTime <= 0) throw lastError ?? new DOMException("Gemini request timed out", "TimeoutError")
+
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), remainingTime)
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal })
+            if (!TEMPORARY_GEMINI_STATUSES.has(response.status) || attempt === GEMINI_MAX_RETRIES) return response
+        } catch (error) {
+            lastError = error
+            if (attempt === GEMINI_MAX_RETRIES || Date.now() >= deadline) throw error
+        } finally {
+            clearTimeout(timeoutId)
+        }
+
+        const retryDelay = Math.min(300, Math.max(0, deadline - Date.now()))
+        if (retryDelay > 0) await new Promise((resolve) => setTimeout(resolve, retryDelay))
+    }
+
+    throw lastError ?? new Error("Gemini request failed")
 }
 
 function roundMoney(value: unknown) {
@@ -181,14 +230,46 @@ Deno.serve(async (request: Request) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")
-    if (!supabaseUrl || !supabaseAnonKey) return publicError("The insight service is not configured.", 503)
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) return publicError("The insight service is not configured.", 503)
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: authorization } },
+        auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
         auth: { persistSession: false, autoRefreshToken: false },
     })
     const token = authorization.slice("Bearer ".length)
     const { data: { user }, error: userError } = await supabase.auth.getUser(token)
     if (userError || !user) return publicError("Your session is invalid or expired.", 401)
+
+    const cacheKey = `${reportPeriod}:${timezoneOffsetMinutes}`
+    const ipHash = await hashIp(clientIp(request), supabaseServiceRoleKey)
+    const { data: rateLimitData, error: rateLimitError } = await supabaseAdmin.rpc("begin_financial_insights_request", {
+        p_user_id: user.id,
+        p_ip_hash: ipHash,
+        p_cache_key: cacheKey,
+    })
+    const rateLimit = (Array.isArray(rateLimitData) ? rateLimitData[0] : null) as RateLimitRow | null
+    if (rateLimitError || !rateLimit) {
+        console.error("Financial insights rate-limit check failed", rateLimitError)
+        return publicError("AI insight is temporarily unavailable.", 503)
+    }
+    if (rateLimit.decision === "cache_hit" && rateLimit.cached_response) {
+        return jsonResponse(rateLimit.cached_response, 200, { "X-Finaura-Cache": "HIT" })
+    }
+    if (rateLimit.decision === "rate_limited" || rateLimit.decision === "concurrent_request") {
+        const message = rateLimit.decision === "concurrent_request"
+            ? "An AI insight request is already in progress."
+            : "AI insights are temporarily rate limited."
+        return publicError(message, 429, { "Retry-After": String(Math.max(1, rateLimit.retry_after_seconds)) })
+    }
+    if (rateLimit.decision !== "allowed" || !rateLimit.request_token) {
+        return publicError("AI insight is temporarily unavailable.", 503)
+    }
+
+    let cacheableResponse: Record<string, unknown> | null = null
+    try {
 
     const [transactionResult, budgetResult, savingResult] = await Promise.all([
         supabase.from("transactions").select("amount, type, transaction_date, saving_goal_id, category:categories!transactions_category_id_fkey(name)").eq("user_id", user.id).order("transaction_date"),
@@ -245,7 +326,10 @@ Deno.serve(async (request: Request) => {
         savingsGoals,
     }
     const hasData = transactions.length + budgets.length + savingsGoals.length > 0
-    if (!hasData) return jsonResponse({ insights: noDataInsights(reportPeriod), generatedAt: new Date().toISOString(), reportPeriod })
+    if (!hasData) {
+        cacheableResponse = { insights: noDataInsights(reportPeriod), generatedAt: new Date().toISOString(), reportPeriod }
+        return jsonResponse(cacheableResponse, 200, { "X-Finaura-Cache": "MISS" })
+    }
 
     const fallbackInsights = (): Insight[] => {
         const net = roundMoney(income - expenses)
@@ -316,7 +400,7 @@ ${JSON.stringify(summary)}`
 
     let geminiResponse: Response
     try {
-        geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent`, {
+        geminiResponse = await fetchGeminiWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-goog-api-key": geminiApiKey },
             body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.15, maxOutputTokens: 1800, responseMimeType: "application/json", responseSchema } }),
@@ -338,9 +422,19 @@ ${JSON.stringify(summary)}`
         if (!text) throw new Error("Gemini returned an empty response")
         const insights = validateInsights(JSON.parse(text))
         if (!insights) throw new Error("Gemini response validation failed")
-        return jsonResponse({ insights, generatedAt: new Date().toISOString(), reportPeriod })
+        cacheableResponse = { insights, generatedAt: new Date().toISOString(), reportPeriod }
+        return jsonResponse(cacheableResponse, 200, { "X-Finaura-Cache": "MISS" })
     } catch (error) {
         console.error("Gemini response could not be validated", error)
         return fallbackResponse("gemini_invalid_response")
+    }
+    } finally {
+        const { error: finishError } = await supabaseAdmin.rpc("finish_financial_insights_request", {
+            p_user_id: user.id,
+            p_request_token: rateLimit.request_token,
+            p_cache_key: cacheKey,
+            p_response: cacheableResponse,
+        })
+        if (finishError) console.error("Financial insights request cleanup failed", finishError)
     }
 })

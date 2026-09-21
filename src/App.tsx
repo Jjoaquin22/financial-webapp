@@ -12,22 +12,22 @@ import Profile from "./pages/Profile"
 import NavBar from "./components/NavBar"
 import { supabase } from "./supabaseClient"
 
-function ProtectedRoutes() {
+function useAuthSession() {
   const [session, setSession] = useState<Session | null>(null)
   const [isCheckingSession, setIsCheckingSession] = useState(true)
-  const location = useLocation()
 
   useEffect(() => {
     let isMounted = true
 
-    void supabase.auth.getSession().then(({ data }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!isMounted) return
-      setSession(data.session)
+      setSession(nextSession)
       setIsCheckingSession(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession)
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!isMounted) return
+      setSession(data.session)
       setIsCheckingSession(false)
     })
 
@@ -37,9 +37,27 @@ function ProtectedRoutes() {
     }
   }, [])
 
-  if (isCheckingSession) {
-    return <div className="auth-loading" role="status">Checking your session…</div>
-  }
+  return { session, isCheckingSession }
+}
+
+function SessionLoading() {
+  return <div className="auth-loading" role="status">Checking your session...</div>
+}
+
+function PublicOnlyRoutes() {
+  const { session, isCheckingSession } = useAuthSession()
+
+  if (isCheckingSession) return <SessionLoading />
+  if (session) return <Navigate to="/Transaction" replace />
+
+  return <Outlet />
+}
+
+function ProtectedRoutes() {
+  const { session, isCheckingSession } = useAuthSession()
+  const location = useLocation()
+
+  if (isCheckingSession) return <SessionLoading />
 
   if (!session) {
     return <Navigate to="/Login" replace state={{ from: location.pathname }} />
@@ -53,14 +71,13 @@ function AppShell() {
 }
 
 function App() {
- 
-
   return (
-    <>
     <Routes>
       <Route path="/" element={<Navigate to="/Login" replace />} />
-      <Route path="/Login" element={<Login />} />
-      <Route path="/Signup" element={<Signup />} />
+      <Route element={<PublicOnlyRoutes />}>
+        <Route path="/Login" element={<Login />} />
+        <Route path="/Signup" element={<Signup />} />
+      </Route>
       <Route element={<ProtectedRoutes />}>
         <Route element={<AppShell />}>
           <Route path="/Dashboard" element={<Dashboard />} />
@@ -72,7 +89,6 @@ function App() {
         </Route>
       </Route>
     </Routes>
-    </>
   )
 }
 
