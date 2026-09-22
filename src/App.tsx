@@ -10,6 +10,7 @@ import SavingGoals from "./pages/SavingGoals"
 import Calendar from "./pages/Calendar"
 import Profile from "./pages/Profile"
 import NavBar from "./components/NavBar"
+import AIChatbotButton from "./components/ai-chatbot/AIChatbotButton"
 import { supabase } from "./supabaseClient"
 
 function useAuthSession() {
@@ -67,7 +68,7 @@ function ProtectedRoutes() {
 }
 
 function AppShell() {
-  return <><NavBar /><div className="app-content"><Outlet /></div></>
+  return <><NavBar /><div className="app-content"><Outlet /></div><AIChatbotButton /></>
 }
 
 function App() {

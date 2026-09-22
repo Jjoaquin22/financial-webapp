@@ -1,2 +1,5 @@
 [functions.financial-insights]
 verify_jwt = true
+
+[functions.ai-chatbot]
+verify_jwt = true
