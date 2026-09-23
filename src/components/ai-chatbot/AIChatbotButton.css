@@ -152,7 +152,7 @@
 .ai-chatbot-panel__timestamp { margin: 0 0 2px; color: #89968e; font-size: .66rem; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: .08em; }
 
 .ai-chatbot-message { display: flex; gap: 8px; max-width: 88%; align-items: flex-end; }
-.ai-chatbot-message p { margin: 0; padding: 10px 12px; border-radius: 15px; font-size: .82rem; line-height: 1.45; }
+.ai-chatbot-message p { min-width: 0; margin: 0; padding: 10px 12px; overflow-wrap: anywhere; border-radius: 15px; font-size: .82rem; line-height: 1.45; }
 .ai-chatbot-message--assistant { align-self: flex-start; }
 .ai-chatbot-message--assistant p { border: 1px solid #e0e9e3; border-bottom-left-radius: 5px; color: #33463a; background: #fff; box-shadow: 0 4px 12px rgb(28 59 40 / 5%); }
 .ai-chatbot-message--user { align-self: flex-end; }
@@ -293,9 +293,12 @@
 
     .ai-chatbot-panel {
         width: calc(100vw - 24px);
-        height: min(540px, calc(100dvh - 92px));
+        height: calc(100dvh - 24px);
+        min-height: 0;
         border-radius: 17px;
     }
+
+    .ai-chatbot--open .ai-chatbot-button { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

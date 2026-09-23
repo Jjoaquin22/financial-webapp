@@ -337,6 +337,11 @@
   .auth-submit { min-height: 46px; }
 }
 
+@media (max-width: 340px) {
+  .auth-captcha { overflow: hidden; }
+  .auth-captcha > div { transform: scale(.9); transform-origin: center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .auth-spinner {
     animation-duration: 1.5s;

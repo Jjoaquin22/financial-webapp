@@ -35,3 +35,7 @@ a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   font: 600 .95rem Inter, ui-sans-serif, system-ui, sans-serif;
   place-items: center;
 }
+
+@media (max-width: 860px) {
+  body { overflow-x: clip; }
+}
