@@ -1,0 +1,199 @@
+/* Shared visual language, loaded after page styles: a quiet financial journal. */
+:root {
+  --font-editorial: Georgia, "Times New Roman", serif;
+  --radius-panel: 10px;
+  --shadow-card: none;
+}
+
+::selection { color: var(--brand-deep); background: #e8f5ed; }
+
+.transactions-page, .budget-page, .goals-page, .calendar-page, .profile-page,
+.dashboard-page, .auth-page {
+  /* Cropped aura rings sit in the margin, behind all content and controls. */
+  background-color: var(--surface-page);
+  background-image:
+    radial-gradient(circle at 100% 0, transparent 148px, rgb(227 185 89 / 22%) 149px, transparent 150px),
+    radial-gradient(circle at 100% 0, transparent 204px, rgb(22 115 72 / 10%) 205px, transparent 206px),
+    radial-gradient(ellipse at 100% 0, rgb(37 149 102 / 7%), transparent 68%),
+    radial-gradient(ellipse at 0 100%, rgb(227 185 89 / 6%), transparent 65%);
+  background-size: 360px 300px, 360px 300px, 640px 380px, 460px 320px;
+  background-position: right top, right top, right top, left bottom;
+  background-repeat: no-repeat;
+}
+
+.page-heading h1, .budget-heading h1, .goals-heading h1,
+.calendar-heading h1, .profile-heading h1, .dashboard-header h1,
+.auth-card h1, .auth-visual h2 {
+  font-family: var(--font-editorial);
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: -.045em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.page-heading, .budget-heading, .goals-heading, .profile-heading,
+.dashboard-header { gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-soft); }
+
+.eyebrow, .budget-eyebrow, .goals-eyebrow, .calendar-eyebrow,
+.dashboard-eyebrow {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin-bottom: 10px;
+  color: var(--brand);
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .15em;
+}
+
+.eyebrow::before, .budget-eyebrow::before, .goals-eyebrow::before,
+.calendar-eyebrow::before, .dashboard-eyebrow::before {
+  width: 15px;
+  height: 2px;
+  flex: 0 0 auto;
+  background: var(--brand-gold);
+  content: "";
+}
+
+/* The brand's gold line acts as a small bookmark throughout the interface. */
+.sidebar { background: #fff; box-shadow: none; }
+.sidebar::before { right: auto; left: 28px; width: 32px; height: 3px; background: var(--brand-gold); }
+.sidebar-brand { margin-top: 12px; margin-bottom: 36px; }
+.finaura-logo-symbol, .finaura-logo-inverse .finaura-logo-symbol { filter: none; }
+.finaura-logo-copy strong { font-family: var(--font-editorial); font-size: 1.5rem; font-weight: 400; }
+.finaura-logo-copy small { margin-top: 5px; font-size: .55rem; font-weight: 500; letter-spacing: .08em; }
+.sidebar-section-label { margin-top: 10px; color: var(--ink-muted); font-weight: 500; }
+.sidebar-nav { gap: 4px; }
+.sidebar-link { border-radius: 6px; font-size: .84rem; font-weight: 500; }
+.sidebar-link:hover { transform: none; }
+.sidebar-link.active { border-color: transparent; background: var(--brand-soft); box-shadow: none; }
+.sidebar-active-mark { right: 12px; width: 3px; height: 16px; border-radius: 2px; }
+.sidebar-link.active .sidebar-active-mark { background: var(--brand-gold); box-shadow: none; }
+.sidebar-footer { padding-top: 20px; border-top: 1px solid var(--border-soft); }
+.sidebar-security { font-weight: 400; }
+.sidebar-security > span { box-shadow: none; }
+.sidebar-logout { border-color: transparent; background: transparent; font-size: .84rem; font-weight: 500; }
+.notification-trigger { border-color: transparent; border-radius: 6px; background: var(--surface-page); font-weight: 500; }
+.notification-panel { border-radius: var(--radius-panel); }
+.notification-panel > header { background: var(--surface-page); }
+
+.transactions-card, .budget-form, .budget-trackers, .goal-form, .goal-trackers,
+.analytics-panel, .profile-card, .profile-summary {
+  border-color: var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: #fff;
+  box-shadow: none;
+}
+
+.summary-card, .budget-summary article, .goals-summary article, .dashboard-stats article {
+  min-width: 0;
+  border: 0;
+  border-top: 1px solid var(--border-soft);
+  border-radius: 0;
+  padding: 20px 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.summary-card strong, .budget-summary strong, .goals-summary strong, .dashboard-stats strong {
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+  font-weight: 500;
+  letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.summary-card span, .budget-summary span, .goals-summary span, .dashboard-stats article > span { font-weight: 500; }
+.amount-cell, .bar-value, .goal-analysis-values, .calendar-page { font-variant-numeric: tabular-nums; }
+.panel-heading h2, .budget-form h2, .budget-trackers h2, .goal-form h2, .goal-trackers h2 { font-size: 1rem; font-weight: 600; }
+.budget-card, .goal-card { border-radius: 6px; border-left-width: 2px; }
+.average-report, .dashboard-summary-strip { border-radius: 6px; background: #eef4f0; box-shadow: none; }
+.dashboard-period { padding: 0; border: 0; background: transparent; }
+.dashboard-period > span { margin-bottom: 3px; }
+.dashboard-period button { min-height: 36px; border-radius: 5px; font-weight: 500; }
+.bar-track { height: 7px; }
+.goal-track { height: 6px; }
+.goal-track span, .profile-progress span { background: var(--brand); }
+.ai-card-note { border-top: 0; border-right: 0; border-bottom: 0; border-radius: 0; box-shadow: none; font-weight: 400; }
+.button, .budget-primary-button, .goal-primary-button { border-radius: 6px; font-weight: 600; }
+.button-primary { box-shadow: none; }
+.button:hover:not(:disabled) { transform: none; }
+.toolbar { padding: 20px; }
+.search-field, .filter-field select { border-radius: 6px; }
+.search-field:focus-within { outline: 2px solid var(--brand); outline-offset: 2px; }
+th { background: #fff; font-weight: 500; }
+.type-badge { border-radius: 4px; font-weight: 500; }
+.profile-avatar { border-width: 2px; border-radius: 50%; background: var(--brand-deep); box-shadow: none; }
+.calendar-page { --calendar-shadow: none; }
+.calendar-controls { box-shadow: none; background: #fff; }
+
+/* A restrained cover for the journal; gold and green remain the signature. */
+.auth-shell { border-color: var(--border-soft); border-radius: 12px; background: #fff; box-shadow: none; backdrop-filter: none; }
+.auth-visual {
+  position: relative;
+  background-color: var(--brand-deep);
+  background-image:
+    radial-gradient(circle at 100% 100%, transparent 100px, rgb(227 185 89 / 26%) 101px, transparent 102px),
+    radial-gradient(circle at 100% 100%, transparent 160px, rgb(255 255 255 / 10%) 161px, transparent 162px),
+    radial-gradient(circle at 100% 100%, transparent 220px, rgb(255 255 255 / 7%) 221px, transparent 222px),
+    radial-gradient(ellipse at 100% 100%, rgb(37 149 102 / 28%), transparent 65%);
+  background-size: 300px 300px;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+}
+.auth-visual::before { position: absolute; top: 0; left: 42px; width: 34px; height: 4px; background: var(--brand-gold); content: ""; }
+.auth-visual h2 { font-size: clamp(2.4rem, 4vw, 3.5rem); }
+.auth-visual .finaura-logo-copy strong { font-size: 1.65rem; }
+.auth-kicker { padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--brand-gold); font-size: .65rem; font-weight: 500; }
+.auth-checklist { gap: 14px; }
+.auth-checklist li { font-size: .85rem; }
+.auth-checklist li::before { width: 12px; height: 1px; border-radius: 0; background: var(--brand-gold); content: ""; }
+.auth-badge { padding: 0; border: 0; background: transparent; font-weight: 500; }
+.auth-card h1 { color: var(--ink-strong); }
+.auth-field input { border-radius: 6px; }
+.auth-submit { border-radius: 6px; background: var(--brand); box-shadow: none; }
+.auth-submit:hover:not(:disabled) { background: var(--brand-deep); box-shadow: none; transform: none; }
+
+.ai-chatbot-button { width: 54px; height: 54px; background: var(--brand-deep); box-shadow: 0 4px 16px rgb(16 93 57 / 15%); }
+.ai-chatbot-button::before { display: none; }
+.ai-chatbot-button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgb(16 93 57 / 20%); }
+.ai-chatbot-panel { border-radius: 12px; box-shadow: 0 12px 40px rgb(17 52 33 / 14%); }
+.ai-chatbot-panel__header { border-top: 3px solid var(--brand-gold); background: var(--brand-deep); }
+.ai-chatbot-panel__avatar { border: 0; background: transparent; }
+.ai-chatbot-panel__identity h2 { font-family: var(--font-editorial); font-size: 1.25rem; font-weight: 400; }
+.ai-chatbot-panel__identity p span { box-shadow: none; }
+.ai-chatbot-panel__messages {
+  background-color: var(--surface-page);
+  background-image:
+    radial-gradient(ellipse at 100% 0, rgb(37 149 102 / 6%), transparent 65%),
+    radial-gradient(circle, rgb(22 115 72 / 8%) .7px, transparent .9px);
+  background-size: 100% 220px, 20px 20px;
+  background-repeat: no-repeat, repeat;
+}
+.ai-chatbot-message p { border-radius: 9px; line-height: 1.6; }
+.ai-chatbot-message--assistant p, .ai-chatbot-typing { box-shadow: none; }
+
+@media (min-width: 861px) {
+  .transactions-main { width: min(1180px, calc(100% - 80px)); }
+  .dashboard-page, .budget-page, .goals-page, .profile-page { padding-top: 48px; }
+}
+
+@media (max-width: 860px) {
+  .sidebar-toggle { border-radius: 6px; box-shadow: none; }
+  .page-heading, .budget-heading, .goals-heading, .profile-heading, .dashboard-header { padding-bottom: 20px; }
+}
+
+@media (max-width: 620px) {
+  .transactions-page, .budget-page, .goals-page, .calendar-page, .profile-page,
+  .dashboard-page, .auth-page {
+    background-size: 200px 180px, 200px 180px, 320px 240px, 260px 200px;
+  }
+  .summary-card, .budget-summary article, .goals-summary article, .dashboard-stats article { padding: 16px 4px; }
+  .page-heading { flex-wrap: wrap; }
+  .toolbar { padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-chatbot-button, .auth-submit, .button { transition: none; }
+}

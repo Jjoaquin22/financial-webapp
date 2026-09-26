@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
+import './finaura-theme.css'
 
 // Configure reCAPTCHA v2 to work with localhost development
 const reCaptchaKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''
