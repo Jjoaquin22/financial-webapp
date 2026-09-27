@@ -197,3 +197,130 @@ th { background: #fff; font-weight: 500; }
 @media (prefers-reduced-motion: reduce) {
   .ai-chatbot-button, .auth-submit, .button { transition: none; }
 }
+
+/* Dark theme overrides live here because this file intentionally loads last. */
+:root[data-theme="dark"] ::selection { color: #102017; background: #78d9a6; }
+
+:root[data-theme="dark"] .transactions-page,
+:root[data-theme="dark"] .budget-page,
+:root[data-theme="dark"] .goals-page,
+:root[data-theme="dark"] .calendar-page,
+:root[data-theme="dark"] .profile-page,
+:root[data-theme="dark"] .dashboard-page,
+:root[data-theme="dark"] .auth-page {
+  color: var(--ink);
+  background-color: var(--surface-page);
+  background-image:
+    radial-gradient(circle at 100% 0, transparent 148px, rgb(232 191 97 / 15%) 149px, transparent 150px),
+    radial-gradient(circle at 100% 0, transparent 204px, rgb(97 201 145 / 12%) 205px, transparent 206px),
+    radial-gradient(ellipse at 100% 0, rgb(50 130 87 / 12%), transparent 68%);
+}
+
+:root[data-theme="dark"] :is(.transactions-page, .budget-page, .goals-page, .calendar-page, .profile-page, .dashboard-page, .auth-card) :is(h1, h2, h3),
+:root[data-theme="dark"] :is(.date-primary, .budget-progress-label strong, .goal-progress-label strong, .profile-fieldset legend, .profile-facts dd, .panel-heading h2, .bar-label strong, .goal-analysis strong, .pie-chart strong, .pie-legend strong, .dashboard-summary-strip strong, .agenda-heading > strong, .agenda-item h3, .agenda-empty strong, .upcoming-list strong) {
+  color: var(--ink-strong);
+}
+
+:root[data-theme="dark"] :is(.page-heading p:not(.eyebrow), .budget-heading p:last-child, .goals-heading p:last-child, .profile-heading > div > p:last-child, .dashboard-header > div > p:last-child, .summary-card span, .budget-summary span, .goals-summary span, .dashboard-stats span, .dashboard-stats small, .budget-trackers-heading > span, .goal-trackers-heading > span, .budget-card-heading p, .goal-card-heading p, .budget-card-footer, .goal-card-footer, .profile-identity p, .profile-progress-hint, .profile-card-heading p:not(.profile-section-kicker), .profile-form-grid small, .chart-loading, .chart-empty, .pie-chart span, .pie-legend small, .chart-legend, .bar-label span, .bar-value, .goal-analysis span, .goal-percent, .dashboard-summary-strip span, .calendar-month-count, .weekday-row, .agenda-heading p, .agenda-time, .agenda-kind, .agenda-item p, .agenda-empty, .upcoming-list small, .sidebar-empty, .more-events) {
+  color: var(--ink-muted);
+}
+
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .transactions-card,
+:root[data-theme="dark"] .budget-form,
+:root[data-theme="dark"] .budget-trackers,
+:root[data-theme="dark"] .goal-form,
+:root[data-theme="dark"] .goal-trackers,
+:root[data-theme="dark"] .analytics-panel,
+:root[data-theme="dark"] .profile-card,
+:root[data-theme="dark"] .profile-summary,
+:root[data-theme="dark"] .auth-shell,
+:root[data-theme="dark"] .auth-card,
+:root[data-theme="dark"] .transaction-modal,
+:root[data-theme="dark"] .notification-panel,
+:root[data-theme="dark"] .ai-chatbot-panel,
+:root[data-theme="dark"] .calendar-layout,
+:root[data-theme="dark"] .calendar-board,
+:root[data-theme="dark"] .calendar-sidebar,
+:root[data-theme="dark"] .day-agenda {
+  border-color: var(--border-soft);
+  color: var(--ink);
+  background: var(--surface-card);
+}
+
+:root[data-theme="dark"] .sidebar-brand:hover,
+:root[data-theme="dark"] .sidebar-link:hover,
+:root[data-theme="dark"] .notification-trigger:hover,
+:root[data-theme="dark"] tbody tr:hover,
+:root[data-theme="dark"] .row-actions button:hover,
+:root[data-theme="dark"] .upcoming-list button:hover,
+:root[data-theme="dark"] .calendar-day:hover { background: #203027; }
+
+:root[data-theme="dark"] :is(.sidebar-link, .sidebar-security, .sidebar-logout, .notification-trigger, .filter-field, .row-actions button, .close-button, .type-picker button, .calendar-filter, .date-jump) { color: var(--ink-muted); }
+:root[data-theme="dark"] .sidebar-link.active { color: var(--brand-bright); background: var(--brand-soft); }
+:root[data-theme="dark"] .sidebar-toggle { border-color: var(--border-soft); color: var(--brand-bright); background: var(--surface-card); }
+:root[data-theme="dark"] .sidebar-logout:hover:not(:disabled) { background: #392326; }
+
+:root[data-theme="dark"] :is(.summary-card, .budget-summary article, .goals-summary article, .dashboard-stats article) { border-color: var(--border-soft); background: transparent; }
+:root[data-theme="dark"] :is(.average-report, .dashboard-summary-strip) { border-color: var(--border-soft); background: #172820; }
+:root[data-theme="dark"] :is(.average-report > div, .dashboard-summary-strip div, .toolbar, .modal-heading, .form-actions, .profile-identity, .profile-card-heading, .profile-actions, .profile-fieldset + .profile-fieldset) { border-color: var(--border-soft); }
+
+:root[data-theme="dark"] :is(input, select, textarea) { color: var(--ink); color-scheme: dark; }
+:root[data-theme="dark"] :is(.search-field, .filter-field select, .form-grid input, .form-grid select, .form-grid textarea, .budget-form input, .budget-form select, .goal-form input, .profile-form-grid input, .auth-field input, .date-jump input, .ai-chatbot-composer input) {
+  border-color: #3a4f43;
+  color: var(--ink);
+  background: #111a15;
+}
+:root[data-theme="dark"] :is(.form-grid input, .form-grid select, .form-grid textarea, .budget-form input, .budget-form select, .goal-form input, .profile-form-grid input, .auth-field input, .date-jump input, .ai-chatbot-composer input):focus { background: #15221b; }
+:root[data-theme="dark"] :is(input, textarea)::placeholder { color: #778b7f; }
+:root[data-theme="dark"] :is(.amount-input, .budget-amount-input, .goal-amount-input) { border-color: #3a4f43; background: #111a15; }
+:root[data-theme="dark"] :is(.button-ghost, .profile-reset, .today-button, .month-navigation button) { border-color: var(--border-soft); color: var(--ink); background: #1b2821; }
+:root[data-theme="dark"] :is(.button-primary, .budget-primary-button, .goal-primary-button, .profile-save, .auth-submit) { color: #fff; background: #1e754c; }
+:root[data-theme="dark"] :is(.button-primary, .budget-primary-button, .goal-primary-button, .profile-save, .auth-submit):hover:not(:disabled) { background: #27885b; }
+
+:root[data-theme="dark"] th { color: var(--ink-muted); background: #152019; }
+:root[data-theme="dark"] td { border-color: var(--border-soft); color: var(--ink); }
+:root[data-theme="dark"] .table-wrap tr { border-color: var(--border-soft); background: var(--surface-card); }
+:root[data-theme="dark"] .table-wrap td:first-child { background: #152019; }
+:root[data-theme="dark"] :is(.budget-card, .goal-card, .agenda-item, .upcoming-list button) { border-color: var(--border-soft); background: #1a2720; }
+:root[data-theme="dark"] :is(.budget-card-warning, .budget-card-danger, .goal-card-complete) { background: #1b2821; }
+:root[data-theme="dark"] :is(.budget-progress, .goal-progress, .bar-track, .goal-track, .profile-progress) { background: #304238; }
+
+:root[data-theme="dark"] .pie-chart::after { background: var(--surface-card); }
+:root[data-theme="dark"] .chart-grid-line { stroke: #33453b; }
+:root[data-theme="dark"] :is(.income-point, .expense-point) { fill: var(--surface-card); }
+
+:root[data-theme="dark"] .calendar-page { --calendar-green: #65d198; --calendar-green-strong: #a5ebc5; --calendar-border: #2b3c32; }
+:root[data-theme="dark"] .calendar-controls { border-color: var(--border-soft); background: rgb(24 34 28 / 90%); }
+:root[data-theme="dark"] :is(.calendar-board, .calendar-sidebar, .day-agenda) { background-image: none; }
+:root[data-theme="dark"] .weekday-row { background: #152019; }
+:root[data-theme="dark"] .calendar-day.outside-month { background: #111915; }
+:root[data-theme="dark"] .day-number { color: var(--ink); }
+:root[data-theme="dark"] .outside-month .day-number { color: #65776c; }
+
+:root[data-theme="dark"] .notification-panel > header,
+:root[data-theme="dark"] .notification-item,
+:root[data-theme="dark"] .ai-chatbot-composer,
+:root[data-theme="dark"] .ai-chatbot-panel__notice { border-color: var(--border-soft); background: var(--surface-card); }
+:root[data-theme="dark"] .notification-item.unread { background: #1b2c23; }
+:root[data-theme="dark"] :is(.notification-item h3, .notification-item p) { color: var(--ink); }
+:root[data-theme="dark"] .notification-symbol { background: #263a2e; }
+:root[data-theme="dark"] .ai-chatbot-panel { box-shadow: 0 18px 55px rgb(0 0 0 / 42%); }
+:root[data-theme="dark"] .ai-chatbot-panel__header,
+:root[data-theme="dark"] .ai-chatbot-button { background: #175f3e; }
+:root[data-theme="dark"] .ai-chatbot-panel__messages { background-color: #101813; background-image: radial-gradient(ellipse at 100% 0, rgb(70 160 108 / 9%), transparent 65%); }
+:root[data-theme="dark"] :is(.ai-chatbot-message--assistant p, .ai-chatbot-typing) { border-color: var(--border-soft); color: var(--ink); background: #1c2922; }
+:root[data-theme="dark"] .ai-chatbot-button__tooltip { background: var(--surface-card); }
+
+:root[data-theme="dark"] .auth-visual { background-color: #0b3d27; }
+:root[data-theme="dark"] :is(.auth-field, .auth-footer, .auth-loading) { color: var(--ink); }
+:root[data-theme="dark"] .auth-password-toggle { border-color: var(--border-soft); color: var(--ink); background: #26342d; }
+:root[data-theme="dark"] .auth-loading { background: var(--surface-page); }
+
+:root[data-theme="dark"] :is(.notice-success, .budget-notice-success, .goals-notice-success, .profile-notice-success, .auth-success, .ai-card-note-success) { border-color: #326b4d; color: #9de6ba; background: #173525; }
+:root[data-theme="dark"] :is(.notice-error, .budget-notice-error, .goals-notice-error, .profile-notice-error, .dashboard-error, .calendar-notice, .auth-alert, .ai-chatbot-panel__error) { border-color: #714044; color: #ffb4b4; background: #3a2023; }
+:root[data-theme="dark"] :is(.ai-card-note, .ai-card-note-warning) { color: #e5c98d; background: #332b1b; }
+
+@media (max-width: 760px) {
+  :root[data-theme="dark"] .table-wrap .row-actions button { border-color: var(--border-soft); background: #1b2821; }
+}

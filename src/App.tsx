@@ -11,6 +11,7 @@ import Calendar from "./pages/Calendar"
 import Profile from "./pages/Profile"
 import NavBar from "./components/NavBar"
 import AIChatbotButton from "./components/ai-chatbot/AIChatbotButton"
+import { ThemeToggle } from "./components/ThemeToggle"
 import { supabase } from "./supabaseClient"
 
 function useAuthSession() {
@@ -73,7 +74,7 @@ function AppShell() {
 
 function App() {
   return (
-    <Routes>
+    <><ThemeToggle /><Routes>
       <Route path="/" element={<Navigate to="/Login" replace />} />
       <Route element={<PublicOnlyRoutes />}>
         <Route path="/Login" element={<Login />} />
@@ -89,7 +90,7 @@ function App() {
           <Route path="/Profile" element={<Profile />} />
         </Route>
       </Route>
-    </Routes>
+    </Routes></>
   )
 }
 

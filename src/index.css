@@ -18,9 +18,26 @@
   --shadow-card: 0 16px 45px rgb(30 53 40 / 7%);
 }
 
+:root[data-theme="dark"] {
+  color: #dbe9e0;
+  background: #0e1511;
+  --brand-deep: #79d6a4;
+  --brand: #61c991;
+  --brand-bright: #8ae0b2;
+  --brand-soft: #20382b;
+  --brand-gold: #e8bf61;
+  --ink-strong: #edf7f0;
+  --ink: #dbe9e0;
+  --ink-muted: #98aa9f;
+  --border-soft: #2b3c32;
+  --surface-page: #0e1511;
+  --surface-card: #18221c;
+  --shadow-card: 0 16px 45px rgb(0 0 0 / 24%);
+}
+
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--surface-page); }
-body { min-width: 320px; min-height: 100vh; margin: 0; }
+body { min-width: 320px; min-height: 100vh; margin: 0; color: var(--ink); background: var(--surface-page); }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
