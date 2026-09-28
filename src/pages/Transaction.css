@@ -29,7 +29,8 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .notice { margin-bottom: 20px; padding: 12px 15px; border: 1px solid; border-radius: 10px; }
 .notice-success { border-color: #b9dfc9; color: #14603a; background: #ebf8f0; }
 .notice-error { border-color: #f0c6c6; color: #a32727; background: #fff0f0; }
-.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.summary-heading { margin: 0 0 12px; color: var(--ink); font-size: 1rem; font-weight: 750; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 20px; }
 .summary-card { display: grid; gap: 8px; padding: 20px; border: 1px solid #e0e8e3; border-radius: 14px; background: rgb(255 255 255 / 84%); box-shadow: 0 8px 30px rgb(23 62 43 / 5%); }
 .summary-card span { color: #69756d; font-size: .8rem; font-weight: 650; }
 .summary-card strong { font-size: clamp(1.2rem, 3vw, 1.65rem); letter-spacing: -.025em; }
@@ -37,8 +38,8 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .expense-text { color: #c14040; }
 
 .transactions-card { overflow: hidden; border: 1px solid #dfe7e1; border-radius: 16px; background: #fff; box-shadow: 0 16px 45px rgb(30 53 40 / 7%); }
-.toolbar { display: flex; gap: 12px; justify-content: space-between; padding: 16px; border-bottom: 1px solid #edf1ee; }
-.search-field { display: flex; width: min(460px, 100%); align-items: center; border: 1px solid #d8e1da; border-radius: 10px; background: #f9fbfa; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; padding: 16px; border-bottom: 1px solid #edf1ee; }
+.search-field { display: flex; flex: 1 1 300px; width: min(460px, 100%); align-items: center; border: 1px solid #d8e1da; border-radius: 10px; background: #f9fbfa; }
 .search-field > span { padding-left: 13px; color: #7a877f; font-size: 1.25rem; }
 .search-field input { width: 100%; padding: 10px 12px; border: 0; outline: 0; background: transparent; }
 .filter-field { display: flex; gap: 10px; align-items: center; color: #637067; font-size: .85rem; font-weight: 650; }
@@ -88,6 +89,10 @@ td small { display: block; max-width: 155px; margin-top: 4px; overflow: hidden; 
 @media (max-width: 860px) {
     .transactions-main { padding-top: 82px; }
     .transaction-modal { max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain; }
+}
+
+@media (max-width: 1000px) {
+    .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {

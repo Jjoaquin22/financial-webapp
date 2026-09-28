@@ -10,6 +10,10 @@ interface TransactionCardsProps<T extends TransactionCardItem> {
     deletingId: string | null
     search: string
     typeFilter: "all" | TransactionCardType
+    monthFilter: string
+    availableMonths: string[]
+    formatMonth: (month: string) => string
+    onMonthFilterChange: (value: string) => void
     onSearchChange: (value: string) => void
     onTypeFilterChange: (value: "all" | TransactionCardType) => void
     onEdit: (transaction: T) => void
@@ -17,13 +21,17 @@ interface TransactionCardsProps<T extends TransactionCardItem> {
 }
 
 function TransactionCards<T extends TransactionCardItem>({
-    transactions, totalTransactionCount, isLoading, deletingId, search, typeFilter,
+    transactions, totalTransactionCount, isLoading, deletingId, search, typeFilter, monthFilter, availableMonths, formatMonth, onMonthFilterChange,
     onSearchChange, onTypeFilterChange, onEdit, onDelete,
 }: TransactionCardsProps<T>) {
     return (
         <section className="transactions-card">
             <div className="toolbar">
                 <div className="search-field"><span aria-hidden="true">⌕</span><input aria-label="Search transactions" type="search" placeholder="Search ID, category, account, or note" value={search} onChange={(event) => onSearchChange(event.target.value)} /></div>
+                <label className="filter-field"><span>Month</span><select aria-label="Filter transactions by month" value={monthFilter} onChange={(event) => onMonthFilterChange(event.target.value)}>
+                    <option value="all">All months</option>
+                    {availableMonths.map((month) => <option key={month} value={month}>{formatMonth(month)}</option>)}
+                </select></label>
                 <label className="filter-field"><span>Type</span><select value={typeFilter} onChange={(event) => onTypeFilterChange(event.target.value as "all" | TransactionCardType)}>
                     <option value="all">All transactions</option><option value="income">Income</option><option value="expense">Expense</option><option value="transfer">Savings</option>
                 </select></label>

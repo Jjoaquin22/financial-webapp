@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { supabase } from "../supabaseClient"
 import type { Tables, TablesInsert, TablesUpdate } from "../types/database"
 import TransactionCards from "../components/TransactionCards"
+import { filterTransactionsByMonth, getAvailableMonths, summarizeTransactions } from "./transactionSummary"
 import "./Transaction.css"
 
 type TransactionType = "income" | "expense" | "transfer"
@@ -37,6 +38,7 @@ const TRANSACTION_SELECT = `
     to_account:accounts!transactions_to_account_id_fkey(account_name, account_type, financial_institution_id)
 `
 const pesoFormatter = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" })
+const monthFormatter = new Intl.DateTimeFormat("en-PH", { month: "long", year: "numeric" })
 const institutionGroups: ReadonlyArray<{ type: InstitutionType; label: string }> = [
     { type: "bank", label: "Banks" },
     { type: "e_wallet", label: "e_wallet" },
@@ -59,6 +61,11 @@ function toLocalInputDate(value = new Date().toISOString()) {
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) return ""
     return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+}
+
+function formatMonth(value: string) {
+    const [year, month] = value.split("-").map(Number)
+    return monthFormatter.format(new Date(year, month - 1, 1))
 }
 
 function createEmptyForm(type: TransactionType = "income"): FormState {
@@ -89,6 +96,7 @@ function Transaction() {
     const [message, setMessage] = useState<StatusMessage | null>(null)
     const [search, setSearch] = useState("")
     const [typeFilter, setTypeFilter] = useState<"all" | TransactionType>("all")
+    const [monthFilter, setMonthFilter] = useState("all")
 
     const fetchData = useCallback(async () => {
         setIsLoading(true)
@@ -151,9 +159,11 @@ function Transaction() {
         ...group,
         institutions: institutions.filter((institution) => institution.type === group.type),
     })), [institutions])
+    const availableMonths = useMemo(() => getAvailableMonths(transactions), [transactions])
+    const monthTransactions = useMemo(() => filterTransactionsByMonth(transactions, monthFilter), [monthFilter, transactions])
     const visibleTransactions = useMemo(() => {
         const query = search.trim().toLowerCase()
-        return transactions.filter((transaction) => {
+        return monthTransactions.filter((transaction) => {
             const accountLabel = transaction.type === "transfer"
                 ? `${transaction.from_account?.account_name ?? ""} ${transaction.to_account?.account_name ?? ""}`
                 : transaction.account?.account_name ?? ""
@@ -162,12 +172,9 @@ function Transaction() {
                 .some((value) => value.toLowerCase().includes(query))
             return matchesType && matchesSearch
         })
-    }, [search, transactions, typeFilter])
+    }, [monthTransactions, search, typeFilter])
 
-    const totals = useMemo(() => transactions.reduce((sum, transaction) => ({
-        income: sum.income + (transaction.type === "income" ? Number(transaction.amount) : 0),
-        expense: sum.expense + (transaction.type === "expense" ? Number(transaction.amount) : 0),
-    }), { income: 0, expense: 0 }), [transactions])
+    const totals = useMemo(() => summarizeTransactions(monthTransactions), [monthTransactions])
 
     const closeForm = () => {
         setForm(createEmptyForm())
@@ -319,12 +326,14 @@ function Transaction() {
         <div className="transactions-page"><main className="transactions-main">
             <section className="page-heading"><div><p className="eyebrow">Overview</p><h1>Transactions</h1><p>Track every peso across your accounts.</p></div><button className="button button-primary" type="button" onClick={openCreateForm}>+ Add transaction</button></section>
             {message && <div className={`notice notice-${message.kind}`} role={message.kind === "error" ? "alert" : "status"}>{message.text}</div>}
+            <h2 className="summary-heading">{monthFilter === "all" ? "All months" : formatMonth(monthFilter)} summary</h2>
             <section className="summary-grid" aria-label="Transaction summary">
                 <article className="summary-card"><span>Total income</span><strong className="income-text">{pesoFormatter.format(totals.income)}</strong></article>
                 <article className="summary-card"><span>Total expenses</span><strong className="expense-text">{pesoFormatter.format(totals.expense)}</strong></article>
                 <article className="summary-card"><span>Net balance</span><strong>{pesoFormatter.format(totals.income - totals.expense)}</strong></article>
+                <article className="summary-card"><span>Total transactions</span><strong>{totals.count}</strong></article>
             </section>
-            <TransactionCards transactions={visibleTransactions} totalTransactionCount={transactions.length} isLoading={isLoading} deletingId={deletingId} search={search} typeFilter={typeFilter} onSearchChange={setSearch} onTypeFilterChange={setTypeFilter} onEdit={openEditForm} onDelete={handleDelete} />
+            <TransactionCards transactions={visibleTransactions} totalTransactionCount={transactions.length} isLoading={isLoading} deletingId={deletingId} search={search} typeFilter={typeFilter} monthFilter={monthFilter} availableMonths={availableMonths} formatMonth={formatMonth} onMonthFilterChange={setMonthFilter} onSearchChange={setSearch} onTypeFilterChange={setTypeFilter} onEdit={openEditForm} onDelete={handleDelete} />
         </main>
         {isFormVisible && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSubmitting) closeForm() }}>
             <section className="transaction-modal" role="dialog" aria-modal="true" aria-labelledby="transaction-form-title">
